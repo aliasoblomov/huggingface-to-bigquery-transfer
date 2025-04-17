@@ -1,7 +1,4 @@
 # huggingface-to-bigquery-transfer
-A simple Python tool to transfer and clone Hugging Face datasets into Google BigQuery.
-
-# hf2bq
 
 A lightweight Python tool to **clone** and **transfer** any Hugging Face dataset into Google BigQuery with just a few lines of code. Whether you need a one‑off load or an automated sync, **hf2bq** handles download, schema inference, retries, and regional configuration—so you can focus on analysis, not infrastructure.
 
