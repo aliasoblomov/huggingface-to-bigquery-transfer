@@ -1,5 +1,6 @@
 # huggingface-to-bigquery-transfer
 
+
 A lightweight Python tool to **clone** and **transfer** any Hugging Face dataset into Google BigQuery with just a few lines of code. Whether you need a one‑off load or an automated sync, **hf2bq** handles download, schema inference, retries, and regional configuration—so you can focus on analysis, not infrastructure.
 
 ---
@@ -28,7 +29,7 @@ Before you begin, make sure you have:
 
 ---
 
-## 🚀 Quickstart in Colab or Jupyter
+## 🚀 Quickstart
 
 This template consists of **three** cells. Run them **in order**:
 
@@ -50,68 +51,13 @@ print("✅ Authenticated with GCP")
 
 > **What it does:** Opens a browser prompt (in Colab) or uses existing credentials to authorize your session to call GCP APIs.
 
-### 3️⃣ Cell 3: Main HF → BigQuery Loader
+### 3️⃣ Cell 3: Run the Loader Script
 
-Below is the general loader script. **Replace** the configuration placeholders before running.
-
-```python
-# === CONFIGURATION ===
-# ▸ gcp_project_id: your GCP project ID
-# ▸ bq_dataset_id : your existing BigQuery dataset
-# ▸ bq_table_id   : name for the new table to create/overwrite
-# ▸ hf_dataset    : Hugging Face dataset identifier (e.g. "username/dataset_name")
-# ▸ hf_split      : which split to load ("train", "test", etc.)
-# ▸ bq_location   : dataset region (e.g. "US", "EU")
-# ======================
-gcp_project_id = "YOUR_PROJECT_ID"
-bq_dataset_id  = "YOUR_DATASET"
-bq_table_id    = "YOUR_TABLE_NAME"
-hf_dataset     = "username/dataset_name"
-hf_split       = "train"
-bq_location    = "US"
-
-import time
-import pandas as pd
-from datasets import load_dataset
-from google.cloud import bigquery
-
-# Build the fully-qualified table reference
-table_ref = f"{gcp_project_id}.{bq_dataset_id}.{bq_table_id}"
-
-# 1) Download & convert dataset
-df = load_dataset(hf_dataset, split=hf_split).to_pandas()
-print(f"Loaded {{len(df)}} rows × {{len(df.columns)}} columns from Hugging Face")
-
-# 2) Initialize BigQuery client
-client = bigquery.Client(project=gcp_project_id, location=bq_location)
-job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE", autodetect=True)
-
-# 3) Upload with retries
-max_retries = 5
-for attempt in range(1, max_retries + 1):
-    try:
-        job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
-        job.result()
-        print(f"✅ Loaded {{job.output_rows}} rows into {{table_ref}}")
-        break
-    except Exception as e:
-        print(f"Attempt {{attempt}} failed: {{e}}")
-        if attempt == max_retries:
-            raise
-        time.sleep(2 ** attempt)
+```bash
+python hf-bigquery-loader.py
 ```
 
----
-
-## 🙋‍♂️ Usage
-
-1. **Clone** this repository:
-   ```bash
-git clone https://github.com/<your-org>/hf2bq.git
-cd hf2bq
-   ```
-2. Open the notebook in Colab or Jupyter.
-3. Follow the **Quickstart** steps above.
+> **What it does:** Executes the general HF → BigQuery loader. Just provide your configuration in the script header, run it, and wait for the data to appear in BigQuery.
 
 ---
 
